@@ -1,6 +1,6 @@
 #![allow(warnings)]
 
-use std::{env, fs, collections::HashMap, fmt::Display};
+use std::{env, fs, collections::HashMap, fmt::Display, path::PathBuf};
 
 type INT_TYPE = i64;
 
@@ -14,16 +14,21 @@ enum Token {
     Bang,
 }
 
-fn resolve_includes(source_path: &str) -> String {
-    let source = match fs::read_to_string(source_path) {
+fn resolve_includes(mut source_path: PathBuf) -> String {
+    let source = match fs::read_to_string(&source_path) {
         Ok(source) => source,
-        Err(e) => panic!("ERROR while reading `{source_path}`: {e:?}")
+        Err(e) => panic!("ERROR while reading `{}`: {e:?}", source_path.display())
     };
+    source_path.pop();
+    let dir = source_path;
     let mut included_source = String::new();
 
     for line in source.lines() {
         if line.starts_with("#include ") {
-            included_source.push_str(&resolve_includes(&line[9..]));
+            let include = PathBuf::from(&line[9..]);
+            let include = dir.join(include);
+
+            included_source.push_str(&resolve_includes(include));
         } else {
             included_source.push_str(line);
             included_source.push('\n');
@@ -93,7 +98,7 @@ fn main() {
     let mut args = env::args();
     let _program = args.next().unwrap();
     
-    let source = resolve_includes(&args.next().expect("please provide a source file"));
+    let source = resolve_includes(args.next().expect("please provide a source file").into());
     let tokens = lex(source);
 
     let mut state = State {
