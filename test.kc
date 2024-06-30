@@ -1,0 +1,8 @@
+main
+
+#include std.kc
+
+:main
+    "> " !ask
+    dup len " is " !swap concat " chars long" concat concat
+    !println

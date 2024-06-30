@@ -1,0 +1,131 @@
+main
+#include std.kc
+
+:i_inc
+    pop
+    -> 1 + <-
+    continue
+
+:i_dec
+    pop
+    -> 1 - <-
+    continue
+
+
+:i_left
+    pop
+    <= <= <- <= <= <-
+    continue
+    
+:i_right
+    pop
+    => => -> => => ->
+    ->
+        empty !not
+        "i_right_nonempty" goto_if
+        0
+    :i_right_nonempty
+    <- 
+    continue
+
+:i_start
+    pop
+    -> dup "i_start_no_skip" goto_if
+    0 <-
+    1 -
+    :i_start_loop_start
+        !dup2 .
+
+        dup "[" == "i_start_open_found" goto_if
+        dup "]" == "i_start_close_found" goto_if 
+        pop i_start_continue
+    
+        :i_start_open_found
+            pop
+            -> 1 + <-
+            i_start_continue
+            
+        :i_start_close_found
+            pop
+            -> dup 0 == "i_start_loop_end" goto_if
+            1 -
+            <-
+            i_start_continue
+        
+        :i_start_continue
+        1 -
+        i_start_loop_start
+    :i_start_loop_end
+    pop
+
+    :i_start_no_skip
+    <- continue
+
+:i_end
+    pop
+    -> dup !not "i_end_no_rewind" goto_if
+    
+    0 <-
+    1 +
+    :i_end_loop_start
+        !dup2 .
+
+        dup "[" == "i_end_open_found" goto_if
+        dup "]" == "i_end_close_found" goto_if 
+        pop i_end_continue
+
+    
+        :i_end_open_found
+            pop
+            -> dup 0 == "i_end_loop_end" goto_if
+            1 -
+            <-
+            i_end_continue
+            
+        :i_end_close_found
+            pop
+            -> 1 + <-
+            i_end_continue
+        
+        :i_end_continue
+        1 +
+        i_end_loop_start
+    :i_end_loop_end
+
+    pop
+    :i_end_no_rewind
+    <- continue
+
+:i_print
+    pop
+    -> dup chr print <-
+    continue
+
+:main
+
+"Program: " !ask !reverse
+
+dup len
+1 -
+-> 0 <-
+
+:mainloop_start
+    dup (0 1 -) == "mainloop_end" goto_if
+    !dup2 .
+    dup "+" == "i_inc"      goto_if
+    dup "-" == "i_dec"      goto_if
+    dup "<" == "i_left"     goto_if
+    dup ">" == "i_right"    goto_if
+    dup "." == "i_print"    goto_if
+    dup "[" == "i_start"    goto_if
+    dup "]" == "i_end"      goto_if
+    pop // unknown character
+    
+    :continue
+    1 -
+    mainloop_start
+:mainloop_end
+
+pop pop
+
+:exit

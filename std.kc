@@ -1,0 +1,68 @@
+stdlib
+
+:ret
+    -> <= <-
+    1 +
+    jump
+
+:println =>
+    print
+    "\n" print
+    ret
+
+:dup2 =>
+    => => -> => dup -> dup <= <- <= <= -> <= <- <= <= <-
+    ret
+
+:swap =>
+    => => -> => <= -> <= <- <= <-
+    ret
+
+:ask =>
+    print input
+    ret
+
+:format_bool =>
+    "format_bool_true" goto_if
+
+    "false" ret
+    
+    :format_bool_true
+    "true" ret
+
+:not =>
+    "not_true" goto_if
+
+    1 ret
+    
+    :not_true
+    0 ret
+
+:reverse =>
+    dup len =>
+    0
+    :reverse_first_move_start
+        -> <= <- !dup2 == "reverse_first_move_end" goto_if
+        =>
+        !dup2 .
+        => -> => <-
+        1 +
+        reverse_first_move_start
+    :reverse_first_move_end
+
+    => pop pop "" ->
+
+    :reverse_second_move_start
+        dup 0 == "reverse_second_move_end" goto_if
+        1 -
+        ->
+        <= <- <= <- concat
+        ->
+        reverse_second_move_start
+    :reverse_second_move_end
+    pop <-
+
+    ret
+    
+
+:stdlib
